@@ -43,6 +43,8 @@ o set up your development environment:
 
 ### Running the Tests
 Automated tests are included to ensure the server and web application functionality.
+> [!NOTE]
+> You should test in a diferent Bash terminal or PowerShell on Windows.
 1. **Ejecutar pruebas unitarias:**
    Run unit tests: To run the automated tests, use the following Maven command:
    ```bash
@@ -78,6 +80,8 @@ Example of a test:
     }
 }
 ```
+This test verifies the behavior of the handleStaticFileRequest method in the HttpServer class. It mocks a Socket and its OutputStream using Mockito, sets up a PrintWriter to write to a ByteArrayOutputStream, and then calls the handleStaticFileRequest method with a file path (/index.html). The test asserts that the response includes the correct HTTP status (HTTP/1.1 200 OK) and content type (Content-Type: text/html), ensuring that the server correctly handles a static file request and returns the expected response.
+
 ### Functional Test
 #### Static Files
 1. Load HTML files::
