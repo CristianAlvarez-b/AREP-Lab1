@@ -21,6 +21,13 @@
     <form id="apiForm">
         <label for="name">Enter your name:</label>
         <input type="text" id="name" name="name" required>
+
+        <label for="method">Choose method:</label>
+        <select id="method">
+            <option value="GET">GET</option>
+            <option value="POST">POST</option>
+        </select>
+
         <button type="submit">Send</button>
     </form>
     <div id="response"></div>
