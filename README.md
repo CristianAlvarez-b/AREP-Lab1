@@ -167,7 +167,7 @@ http://localhost:35000/js/app.js
 
     
 
-### uilt with
+### Built with
 - Java: The programming language used
 - Maven: Dependency management and build tool
 - JUnit: Testing framework
