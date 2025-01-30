@@ -87,9 +87,17 @@ This test verifies the behavior of the handleStaticFileRequest method in the Htt
 1. Load HTML files::
    - index.html:
      
+     ```Bash
+      http://localhost:35000/index.html
+     ```
+     
      ![image](https://github.com/user-attachments/assets/ba9c2271-83af-44e2-9e8b-376397e2e427)
 
    - About.html:
+     
+     ```Bash
+     http://localhost:35000/about.html
+     ```
      
      ![image](https://github.com/user-attachments/assets/d9cd5492-6de5-4aec-b51a-f7b8776aa6e2)
 
@@ -97,30 +105,62 @@ This test verifies the behavior of the handleStaticFileRequest method in the Htt
 2. Load images:
 
    - jpg:
+     
+     ```Bash
+     http://localhost:35000/img/banner.jpg
+     ```
 
     ![image](https://github.com/user-attachments/assets/b11ac037-6f55-47ae-9eb1-e009a272d9e7)
      
    - png:
+     
+      ```Bash
+     http://localhost:35000/img/about.png
+     ```
 
     ![image](https://github.com/user-attachments/assets/f85bc11e-db6b-4a84-9101-c96730c8b024)
+ ### Javascript
+ 
+```Bash
+http://localhost:35000/js/app.js
+```
+ 
+ ![image](https://github.com/user-attachments/assets/e8b67605-7cc6-4f6c-8422-040d812b7269)
+
 
  ### Api
 
   - Hello:
       - Without params:
         
+        ```Bash
+        http://localhost:35000/app/hello
+        ```
+        
         ![image](https://github.com/user-attachments/assets/37e78d69-7b01-4de8-9a39-2b486b293a2d)
         
-      - With params: http://localhost:35000/app/hello?name=raul
+      - With params:
+        
+        ```Bash
+        http://localhost:35000/app/hello?name=raul
+        ```
         
         ![image](https://github.com/user-attachments/assets/41a54c92-f0c3-454d-95f1-4556353fda33)
 
     
   - PI:
+    
+     ```Bash
+     http://localhost:35000/app/PI
+     ```
 
     ![image](https://github.com/user-attachments/assets/0e6ab9e7-1138-4c58-91fd-dc014dd37f0d)
 
-  - Square: http://localhost:35000/app/square?number=4
+  - Square:
+    
+     ```Bash
+     http://localhost:35000/app/square?number=4
+     ```
 
     ![image](https://github.com/user-attachments/assets/73828afb-9ab3-4a40-bccb-28ea7049d365)
 
