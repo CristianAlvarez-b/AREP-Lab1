@@ -1,88 +1,145 @@
 # Web Server
 
-Este proyecto implementa un servidor web simple que admite múltiples solicitudes consecutivas sin concurrencia. Está diseñado para leer archivos de disco locales y devolverlos cuando se lo solicitan, incluidas páginas HTML, archivos JavaScript, CSS e imágenes. Además, se crea una aplicación web para probar el servidor, que presenta comunicación asincrónica con servicios REST en el backend.
-## Empezando
+This project implements a simple web server that supports multiple consecutive requests without concurrency. It is designed to read local disk files and return them upon request, including HTML pages, JavaScript files, CSS, and images. Additionally, a web application is created to test the server, which features asynchronous communication with backend REST services.
+## Getting Started
 
-Estas instrucciones lo guiarán para obtener una copia del proyecto ejecutándose en su máquina local para fines de desarrollo y prueba.
-### Prerequisitos
+These instructions will guide you through obtaining a copy of the project running on your local machine for development and testing purposes
+### Prerequisites
 
-Para ejecutar este proyecto, debe tener Java instalado en su sistema. Siga los pasos a continuación para instalar Java y Maven (que se utiliza para administrar dependencias).
-1. **Instalar Java:**
+To run this project, you must have Java installed on your system. Follow the steps below to install Java and Maven (which is used for managing dependencies).
+1. **Install Java:**
 
-    Descargue e instale Java JDK (versión 11 o superior). Puede seguir las instrucciones en el [sitio web oficial de Java](https://www.oracle.com/java/technologies/javase-jdk11-downloads.html).
+    Download and install the Java JDK (version 11 or higher). You can follow the instructions on the [official Java website](https://www.oracle.com/java/technologies/javase-jdk11-downloads.html).
 
-2. **Instalar Maven:**
+2. **Install Maven:**
 
-   - Maven se utiliza para gestionar dependencias de proyectos. Puedes descargar e instalar Maven desde [aquí](https://maven.apache.org/download.cgi).
+   - Maven is used to manage project dependencies. You can download and install Maven from [here](https://maven.apache.org/download.cgi).
 
-   - Después de la instalación, verifique si Maven está instalado correctamente ejecutando: mvn -v Esto debería mostrar la versión de Maven instalada.
+   - After installation, verify if Maven is correctly installed by running: mvn -v. This should show the installed Maven version.
   
-### Instalando
+### Installing
 > [!NOTE]
-> Debes realizar los siguientes pasos desde una terminal de Bash o desde PowerShell en Windows.
+> You should perform the following steps from a Bash terminal or PowerShell on Windows.
 
-Para poner en funcionamiento su entorno de desarrollo:
-1. **Clonar el repositorio:**
+o set up your development environment:
+1. **Clone the repository:**
 ```bash
    git clone https://github.com/CristianAlvarez-b/AREP-Lab1
 ```
-2. **Navegar al directorio del proyecto:**
+2. **Navigate to the project directory:**
 ```bash
    cd AREP-Lab1
 ```
-3. **Construye el proyecto con Maven:**
+3. **Build the project with Maven:**
 ```bash
    mvn clean install
 ```
-  Esto compilará el código y lo empaquetará en un archivo JAR ejecutable.
-4. **Ejecutar el servidor:**
+  This will compile the code and package it into an executable JAR file.
+4. **Run the server:**
 ```bash
    java -jar target/HttpServer-1.0-SNAPSHOT.jar
 ```
-   El servidor se iniciará y escuchará en el puerto 35000 de forma predeterminada. Ahora puede acceder al servidor web a través de `http://localhost:35000`.
+   The server will start and listen on port 35000 by default. You can now access the web server `http://localhost:35000`.
 
-### Ejecución de las pruebas
-Se incluyen pruebas automatizadas para garantizar la funcionalidad del servidor y la aplicación web.
+### Running the Tests
+Automated tests are included to ensure the server and web application functionality.
 1. **Ejecutar pruebas unitarias:**
-   Para ejecutar las pruebas automatizadas, utilice el siguiente comando Maven: mvn test
-   Esto ejecutará todas las pruebas unitarias y mostrará los resultados en la terminal.
+   Run unit tests: To run the automated tests, use the following Maven command:
+   ```bash
+   mvn test
+   ```
+   This will run all the unit tests and show the results in the terminal.
 
-## Desglose de pruebas
-Las pruebas de extremo a extremo simulan el flujo de trabajo completo de un usuario que interactúa con el servidor. Estas pruebas validan el manejo correcto de múltiples solicitudes, el servicio de archivos y la comunicación asincrónica entre el frontend y el backend.
-Example test:
+## Test
+### Unit Test
+
+![image](https://github.com/user-attachments/assets/12c81bad-e2df-40e6-853a-c9c89d45394f)
+
+Example of a test:
 ```java
 @Test
-public void testFileServing() throws IOException {
- // Simulate a request for a static file
- String filePath = "/index.html";
- ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
- PrintWriter out = new PrintWriter(outputStream);
+    public void testHandleStaticFileRequest() throws IOException {
+        Socket mockSocket = mock(Socket.class);
+        OutputStream mockOutputStream = mock(OutputStream.class);
 
- HttpServer.handleStaticFileRequest(filePath, out, mockSocket);
 
- // VeSe verifica que la consulta del usuario si contenga el mensaje http correspondiente
- String output = outputStream.toString();
- assertTrue(output.contains("HTTP/1.1 200 OK"));
- assertTrue(output.contains("Content-Type: text/html"));
+        when(mockSocket.getOutputStream()).thenReturn(mockOutputStream);
+
+        String filePath = "/index.html";
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        PrintWriter out = new PrintWriter(outputStream);
+
+
+        HttpServer.handleStaticFileRequest(filePath, out, mockSocket);
+
+        String output = outputStream.toString();
+        assertTrue(output.contains("HTTP/1.1 200 OK"));
+        assertTrue(output.contains("Content-Type: text/html"));
+    }
 }
 ```
-### Construido con
-- Java: el lenguaje de programación utilizado
-- Maven: herramienta de gestión de dependencias y compilación
-- JUnit: marco de pruebas
-- Mockito: marco de simulación para pruebas unitarias
+### Functional Test
+#### Static Files
+1. Load HTML files::
+   - index.html:
+     
+     ![image](https://github.com/user-attachments/assets/ba9c2271-83af-44e2-9e8b-376397e2e427)
 
-### Autor
+   - About.html:
+     
+     ![image](https://github.com/user-attachments/assets/d9cd5492-6de5-4aec-b51a-f7b8776aa6e2)
+
+
+2. Load images:
+
+   - jpg:
+
+    ![image](https://github.com/user-attachments/assets/b11ac037-6f55-47ae-9eb1-e009a272d9e7)
+     
+   - png:
+
+    ![image](https://github.com/user-attachments/assets/f85bc11e-db6b-4a84-9101-c96730c8b024)
+
+ ### Api
+
+  - Hello:
+      - Without params:
+        
+        ![image](https://github.com/user-attachments/assets/37e78d69-7b01-4de8-9a39-2b486b293a2d)
+        
+      - With params: http://localhost:35000/app/hello?name=raul
+        
+        ![image](https://github.com/user-attachments/assets/41a54c92-f0c3-454d-95f1-4556353fda33)
+
+    
+  - PI:
+
+    ![image](https://github.com/user-attachments/assets/0e6ab9e7-1138-4c58-91fd-dc014dd37f0d)
+
+  - Square: http://localhost:35000/app/square?number=4
+
+    ![image](https://github.com/user-attachments/assets/73828afb-9ab3-4a40-bccb-28ea7049d365)
+
+
+    
+
+### uilt with
+- Java: The programming language used
+- Maven: Dependency management and build tool
+- JUnit: Testing framework
+- Mockito: Mocking framework for unit testing
+
+### Author
 - Cristian Javier Alvarez Baquero
   
 ### License
-Este proyecto está licenciado bajo la licencia MIT: consulte el archivo LICENSE.md para obtener más detalles
+This project is licensed under the MIT license: see the LICENSE.md file for details.
 
-### Explicación de secciones:
-- **Empezando**: Instrucciones para configurar el entorno de desarrollo.
-- **Prerequisitos**: Qué herramientas necesitas y cómo instalarlas (Java y Maven).
-- **Instalando**: Cómo clonar el repositorio, construir y ejecutar el proyecto.
-- **Ejecución de las pruebas**: Cómo ejecutar los tests y qué tipo de pruebas hay (unitarias y de estilo de código).
-- **Construido con**: Herramientas y bibliotecas utilizadas en el proyecto.
-- **License**: Tipo de licencia (MIT) y enlace al archivo de licencia.
+### Explanation of Sections:
+- **Getting Started**: Instructions for setting up the development environment.
+- **Prerequisites**: What tools you need and how to install them (Java and Maven).
+- **Installing**: How to clone the repository, build, and run the project.
+- **Running the Tests**: How to run the tests and what types of tests are included (unit and functional).
+- **Built with**: Tools and libraries used in the project.
+- **License**: License type (MIT) and link to the license file.
 
