@@ -22,44 +22,115 @@ public class HttpServerTest {
         String mimeType = HttpServer.getMimeType("/style.css");
         assertEquals("text/css", mimeType);
     }
-
     @Test
-    public void testHandleApiRequest() {
-        // Probar una solicitud válida a la API
-        String response = HttpServer.handleApiRequest("/app/hello?name=John", "GET");
-        assertTrue(response.contains("Hello, John"));
-
-        // Probar una solicitud inválida
-        response = HttpServer.handleApiRequest("/app/unknown", "GET");
-        assertTrue(response.contains("API endpoint not found"));
+    public void testGetMimeTypeJs() {
+        assertEquals("application/javascript", HttpServer.getMimeType("/script.js"));
     }
 
     @Test
+    public void testHandleApiRequestHello() {
+        String response = HttpServer.handleApiRequest("/app/hello?name=John", "GET", mock(BufferedReader.class));
+        assertTrue(response.contains("\"message\": \"Hello, John!\""));
+    }
+    @Test
+    public void testHandleApiRequestHelloWithoutName() {
+        String response = HttpServer.handleApiRequest("/app/hello", "GET", mock(BufferedReader.class));
+        assertTrue(response.contains("\"message\": \"Hello, Unknown!\""));
+    }
+
+    @Test
+    public void testHandleApiRequestPi() {
+        String response = HttpServer.handleApiRequest("/app/PI", "GET", mock(BufferedReader.class));
+        assertTrue(response.contains("\"value\": 3.141592653589793"));
+    }
+
+    @Test
+    public void testHandleApiRequestSquareValidNumber() {
+        String response = HttpServer.handleApiRequest("/app/square?number=4", "GET", mock(BufferedReader.class));
+        assertTrue(response.contains("\"number\": 4"));
+        assertTrue(response.contains("\"square\": 16"));
+    }
+    @Test
+    public void testHandleApiRequestSquareMissingParameter() {
+        String response = HttpServer.handleApiRequest("/app/square", "GET", mock(BufferedReader.class));
+        assertTrue(response.contains("\"error\": \"Missing number parameter\""));
+    }
+
+    @Test
+    public void testHandleApiRequestSquareInvalidNumber() {
+        String response = HttpServer.handleApiRequest("/app/square?number=abc", "GET", mock(BufferedReader.class));
+        assertTrue(response.contains("\"error\": \"Invalid number format\""));
+    }
+    @Test
+    public void testHandleApiRequestNotFound() {
+        String response = HttpServer.handleApiRequest("/app/unknown", "GET", mock(BufferedReader.class));
+        assertTrue(response.contains("\"error\": \"API endpoint not found\""));
+    }
+
+    @Test
+    public void testExtractNameFromJson() throws IOException {
+
+        String jsonInput = "{\"name\":\"Alice\"}";
+        BufferedReader mockReader = new BufferedReader(new StringReader(jsonInput));
+
+        assertEquals("Alice", HttpServer.extractNameFromJson(mockReader));
+    }
+
+    @Test
+    public void testCreateJsonResponse() {
+        String response = HttpServer.createJsonResponse(200, "{\"message\":\"Success\"}");
+        assertTrue(response.contains("HTTP/1.1 200 OK"));
+        assertTrue(response.contains("Content-Type: application/json"));
+        assertTrue(response.contains("{\"message\":\"Success\"}"));
+    }
+
+    @Test
+    public void testGetMimeTypeUnknown() {
+        assertEquals("application/octet-stream", HttpServer.getMimeType("/file.unknown"));
+    }
+    @Test
     public void testHandleStaticFileRequest() throws IOException {
-        // Crear un mock de Socket
         Socket mockSocket = mock(Socket.class);
         OutputStream mockOutputStream = mock(OutputStream.class);
 
-        // Hacer que el mock del socket devuelva el mock del OutputStream
+
         when(mockSocket.getOutputStream()).thenReturn(mockOutputStream);
 
-        // Simular el comportamiento del método
         String filePath = "/index.html";
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         PrintWriter out = new PrintWriter(outputStream);
 
-        // Llamar al método con el Socket simulado
+
         HttpServer.handleStaticFileRequest(filePath, out, mockSocket);
-        // Verificar la salida
+
         String output = outputStream.toString();
-        assertFalse(output.contains("HTTP/1.1 200 OK"));
-        assertFalse(output.contains("Content-Type: text/html"));
+        assertTrue(output.contains("HTTP/1.1 200 OK"));
+        assertTrue(output.contains("Content-Type: text/html"));
+    }
+    @Test
+    public void testHandleStaticFileRequestNotFound() throws IOException {
+
+        Socket mockSocket = mock(Socket.class);
+        OutputStream mockOutputStream = new ByteArrayOutputStream();
+        when(mockSocket.getOutputStream()).thenReturn(mockOutputStream);
+
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        PrintWriter out = new PrintWriter(outputStream, true);
+
+        HttpServer.handleStaticFileRequest("/nonexistent.html", out, mockSocket);
+
+        String response = outputStream.toString();
+        assertTrue(response.contains("HTTP/1.1 404 Not Found"));
+        assertTrue(response.contains("<h1>404 Not Found</h1>"));
     }
 
     @Test
-    public void testHandleApiRequestNoName() {
-        // Prueba con un nombre no pasado en la URL
-        String response = HttpServer.handleApiRequest("/app/hello", "GET");
-        assertTrue(response.contains("Hello, Unknown"));
+    public void testExtractQueryParam() {
+        assertEquals("John", HttpServer.extractQueryParam("/app/hello?name=John", "name"));
+        assertEquals("42", HttpServer.extractQueryParam("/app/square?number=42", "number"));
+        assertNull(HttpServer.extractQueryParam("/app/hello", "name"));
     }
+
+
+
 }

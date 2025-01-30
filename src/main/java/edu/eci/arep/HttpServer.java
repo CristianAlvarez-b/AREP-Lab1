@@ -42,11 +42,9 @@ public class HttpServer {
             }
 
             if (filePath.startsWith("/app")) {
-                // Handle API requests
-                String response = handleApiRequest(filePath, method);
+                String response = handleApiRequest(filePath, method, in);
                 out.println(response);
             } else {
-                // Handle static file requests
                 handleStaticFileRequest(filePath, out, clientSocket);
             }
 
@@ -88,31 +86,89 @@ public class HttpServer {
         }
     }
 
-    static String handleApiRequest(String path, String method) {
+    public static String handleApiRequest(String path, String method, BufferedReader in) {
         if (path.startsWith("/app/hello")) {
             String name = "Unknown";
-            int queryIndex = path.indexOf("?");
 
-            if (queryIndex != -1 && queryIndex < path.length() - 1) {
-                String[] params = path.substring(queryIndex + 1).split("&");
-                for (String param : params) {
-                    String[] keyValue = param.split("=");
-                    if (keyValue[0].equals("name") && keyValue.length > 1) {
-                        name = keyValue[1];
-                    }
+            if (method.equals("GET")) {
+                name = extractQueryParam(path, "name");
+            } else if (method.equals("POST")) {
+                name = extractNameFromJson(in);
+            }
+            if (name == null) {
+                name = "Unknown";
+            }
+            return createJsonResponse(200, "{\"message\": \"Hello, " + name + "!\"}");
+
+        } else if (path.startsWith("/app/PI")) {
+            return createJsonResponse(200, "{\"value\": " + Math.PI + "}");
+
+        } else if (path.startsWith("/app/square")) {
+            String numberStr = extractQueryParam(path, "number");
+            if (numberStr != null) {
+                try {
+                    int number = Integer.parseInt(numberStr);
+                    return createJsonResponse(200, "{\"number\": " + number + ", \"square\": " + (number * number) + "}");
+                } catch (NumberFormatException e) {
+                    return createJsonResponse(400, "{\"error\": \"Invalid number format\"}");
                 }
             }
-
-            return "HTTP/1.1 200 OK\r\n" +
-                    "Content-Type: application/json\r\n" +
-                    "\r\n" +
-                    "{\"message\": \"Hello, " + name + "!\"}";
-        } else {
-            return "HTTP/1.1 404 Not Found\r\n" +
-                    "Content-Type: application/json\r\n" +
-                    "\r\n" +
-                    "{\"error\": \"API endpoint not found\"}";
+            return createJsonResponse(400, "{\"error\": \"Missing number parameter\"}");
         }
+
+        return createJsonResponse(404, "{\"error\": \"API endpoint not found\"}");
+    }
+
+    static String extractQueryParam(String path, String key) {
+        int queryIndex = path.indexOf("?");
+        if (queryIndex != -1 && queryIndex < path.length() - 1) {
+            String[] params = path.substring(queryIndex + 1).split("&");
+            for (String param : params) {
+                String[] keyValue = param.split("=");
+                if (keyValue.length > 1 && keyValue[0].equals(key)) {
+                    return keyValue[1];
+                }
+            }
+        }
+        return null;
+    }
+
+    static String extractNameFromJson(BufferedReader in) {
+        try {
+            StringBuilder body = new StringBuilder();
+            String line;
+            while (in.ready() && (line = in.readLine()) != null) {
+                body.append(line);
+            }
+
+            String bodyStr = body.toString();
+            int nameIndex = bodyStr.indexOf("\"name\":");
+            if (nameIndex != -1) {
+                int start = bodyStr.indexOf("\"", nameIndex + 7) + 1;
+                int end = bodyStr.indexOf("\"", start);
+                if (start != -1 && end != -1) {
+                    return bodyStr.substring(start, end);
+                }
+            }
+        } catch (IOException e) {
+            return "Error reading request body";
+        }
+        return "Unknown";
+    }
+
+    static String createJsonResponse(int statusCode, String jsonBody) {
+        String statusMessage = switch (statusCode) {
+            case 200 -> "200 OK";
+            case 400 -> "400 Bad Request";
+            case 404 -> "404 Not Found";
+            case 500 -> "500 Internal Server Error";
+            default -> statusCode + " Unknown";
+        };
+
+        return "HTTP/1.1 " + statusMessage + "\r\n" +
+                "Content-Type: application/json\r\n" +
+                "\r\n" +
+                jsonBody;
     }
 
     static String getMimeType(String filePath) {
